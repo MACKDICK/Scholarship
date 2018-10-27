@@ -1,0 +1,14 @@
+## Set values
+;listen = 127.0.0.1:9000
+;listen.owner = nobody
+;listen.group = nobody
+;listen.mode = 0666
+;user = apache
+;group = apache
+
+listen = /var/run/php-fpm/php-fpm.sock
+listen.owner = nginx
+listen.group = nginx
+listen.mode = 0664
+user = nginx
+group = nginx
