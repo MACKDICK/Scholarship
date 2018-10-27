@@ -1,0 +1,17 @@
+## Install NGINX
+$ sudo yum install nginx -y
+
+## Install PHP and PHP-FPM
+$ sudo yum install php -y
+$ sudo yum install php-fpm -y
+
+## Add NGINX and PHP-FPM service start to boot sequence
+$ sudo chkconfig nginx on
+$ sudo chkconfig php-fpm on
+
+## Start NGINX and PHP-FPM service
+$ sudo service nginx start
+$ sudo service php-fpm start
+
+## Add <file>.php to /var/www/html
+## Verify configuration via http://www.domain.com/<file>.php
