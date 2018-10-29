@@ -1,0 +1,8 @@
+########################Create Table#############################
+use innodb;
+CREATE TABLE Images (
+     Id MEDIUMINT NOT NULL AUTO_INCREMENT,
+     Name CHAR(30) NOT NULL,
+     PRIMARY KEY (id)
+);
+
