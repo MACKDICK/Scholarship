@@ -1,0 +1,7 @@
+npm install express
+npm install --save express-fileupload
+npm install body-parser
+npm install mysql
+npm install ejs
+npm install req-flash
+npm install -g nodemon
