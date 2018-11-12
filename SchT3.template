@@ -1,0 +1,268 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'false'
+      EnableDnsHostnames: 'false'
+      InstanceTenancy: default
+      Tags:
+      - Key: Name
+        Value: VPCT
+
+  mySubnetPrT1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-west-1a"
+      Tags:
+      - Key: Name
+        Value: PrivateSNT1
+        
+  mySubnetPrT2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: "us-west-1b"
+      Tags:
+      - Key: Name
+        Value: PrivateSNT2
+
+  mySubnetPuT1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: "us-west-1a"
+      Tags:
+      - Key: Name
+        Value: PublicSNT1
+        
+  mySubnetPuT2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: "us-west-1b"
+      Tags:
+      - Key: Name
+        Value: PublicSNT2
+  
+  myRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: myVPC
+      Tags:
+      - Key: Name
+        Value: RTPrivateT
+
+  mySubnetRouteTableAssociationPr1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetPrT1
+      RouteTableId:
+        Ref: myRouteTable        
+        
+  mySubnetRouteTableAssociationPr2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetPrT2
+      RouteTableId:
+        Ref: myRouteTable
+
+  myRouteTablePu:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: myVPC
+      Tags:
+      - Key: Name
+        Value: RTPublicT
+
+  mySubnetRouteTableAssociationPu1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetPuT1
+      RouteTableId:
+        Ref: myRouteTablePu        
+        
+  mySubnetRouteTableAssociationPu2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: mySubnetPuT2
+      RouteTableId:
+        Ref: myRouteTablePu
+
+  myInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: IGT
+
+  myAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: myVPC
+      InternetGatewayId:
+        Ref: myInternetGateway
+        
+  myRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: myRouteTablePu
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: myInternetGateway
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+      - Key: Name
+        Value: SGT
+      GroupDescription: Allow http to client host and ssh
+      GroupName: SGT
+      VpcId:
+        Ref: myVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+  
+  Ec2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      KeyName: KPC
+      ImageId: ami-01beb64058d271bc4
+      InstanceType: t2.micro
+      Tags:
+      - Key: Name
+        Value: PIT1
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: InstanceSecurityGroup
+          SubnetId: 
+            Ref: "mySubnetPrT1"
+
+  Ec2InstancePr2: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      KeyName: KPC
+      ImageId: ami-01beb64058d271bc4
+      InstanceType: t2.micro
+      Tags:
+      - Key: Name
+        Value: PrT2
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: InstanceSecurityGroup
+          SubnetId: 
+            Ref: "mySubnetPrT2"
+
+  Ec2InstancePu1: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      KeyName: KPC
+      ImageId: ami-01beb64058d271bc4
+      InstanceType: t2.micro
+      Tags:
+      - Key: Name
+        Value: PuT1
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: InstanceSecurityGroup
+          SubnetId: 
+            Ref: "mySubnetPuT1"
+
+  Ec2InstancePu2: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      KeyName: KPC
+      ImageId: ami-01beb64058d271bc4
+      InstanceType: t2.micro
+      Tags:
+      - Key: Name
+        Value: PuT2
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: InstanceSecurityGroup
+          SubnetId: 
+            Ref: "mySubnetPuT2"
+
+  NAT:
+    DependsOn: myAttachGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP
+        - AllocationId
+      SubnetId:
+        Ref: mySubnetPuT2
+      Tags:
+        - Key: foo
+          Value: bar
+        - Key: Name
+          Value: NatGatewayT
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: myVPC
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: myRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NAT
+
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      LoadBalancerName: LBT
+      SecurityGroups:
+      - Ref: InstanceSecurityGroup
+      Subnets:
+      - Ref: mySubnetPuT1
+      - Ref: mySubnetPuT2
+      Instances:
+      - Ref: Ec2Instance
+      - Ref: Ec2InstancePr2
+      Listeners:
+      - LoadBalancerPort: '80'
+        InstancePort: '80'
+        Protocol: HTTP
+      HealthCheck:
+        Target: HTTP:80/
+        HealthyThreshold: '3'
+        UnhealthyThreshold: '5'
+        Interval: '30'
+        Timeout: '5'
+      ConnectionDrainingPolicy:
+        Enabled: 'true'
+        Timeout: '60'
